@@ -54,7 +54,7 @@ Cmdouble.h
 
 ![](https://raw.githubusercontent.com/charmber/images/main/img.png)
 
-在并发量为800的情况下也能稳定全部请求成功，并且每分钟可以接收10万以上请求
+在并发量为800的情况下也能稳定全部请求成功
 
 #### 路由相关api
 实现类为router，
