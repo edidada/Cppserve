@@ -1,10 +1,7 @@
 #include "../Cmdoule.h"
-//const std::string Hearder="HTTP/1.1 200 ok\r\ncontent-type: application/json;charset=utf-8\r\nconnection: close\r\n\r\n";
-//const std::string buf="{\n\"user\":\"1234567890\",\n\"name\":\"梦\",\n\"title\":\"哈哈哈哈哈了\",\n\"news_type\":\"科技\"\n}";//HTTP响应
-//字符串转换char*
 
 #define MAX_EVENTS  1024                                    //监听上限数
-#define BUFLEN 4096
+#define BUFLEN 4096                 //缓冲区大小
 
 //查找键值对
 void FindKeyValue(std::unordered_map<std::string,std::string>&Te,std::string s,int start,std::string Key);
@@ -50,13 +47,24 @@ private:
     const std::string ContentTypeJson="content-type: application/json;charset=utf-8\r\n";
     const std::string connection="connection: close\r\n\r\n";
 };
+
+
+//string类型转char类型
 void Header::StrChangeChar(std::string str,char msg[]) {
     strcpy(msg,str.c_str());
 }
 
+
+//初始化http头部信息
 std::string Header::initHeader() {
     return Header+ContentTypeJson+connection;
 }
+
+/*
+*reques请求信息
+*code:请求状态码
+*msg：携带的信息
+*/
 
 int Header::SendRequestHeader(int code,std::string msg){
     std::string head="HTTP/1.1 "+std::to_string(code)+" "+"ok\r\n"+ContentTypeJson+connection;
@@ -117,6 +125,8 @@ void Header::SerializationHeader(char res[]) {
 }
 
 
+
+//查找键值对
 void FindKeyValue(std::unordered_map<std::string,std::string>&Te,std::string s,int start,std::string Key){
     int lock=0,begin=0;
     for(int i=start+Key.size();i<s.size();i++){

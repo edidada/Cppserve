@@ -11,7 +11,7 @@ public:
 
 
 private:
-    //分界线
+
     int Port=8080;         //端口号
     std::vector<std::string> t;
 
@@ -30,9 +30,9 @@ int chamber::run() {
     Init_listen_socket(g_efd, Port);                      //初始化监听socket
 
     struct epoll_event events[MAX_EVENTS+1];            //保存已经满足就绪事件的文件描述符数组
-    printf("server running:port[%d]\n", Port);
 
     int checkpos = 0, i;
+    printf("服务启动，监听端口为:%d\n",Port);
     while (1) {
         /* 超时验证，每次测试100个链接，不测试listenfd 当客户端60秒内没有和服务器通信，则关闭此客户端链接 */
 
@@ -52,7 +52,7 @@ int chamber::run() {
             }
         }
 
-        /*监听红黑树g_efd, 将满足的事件的文件描述符加至events数组中, 1秒没有事件满足, 返回 0*/
+        /*监听红黑树g_efd, 将满足的事件的文件描述符加至events数组中, 1秒没有事件满足, 返回 0,返回满足就绪事件的最大描述符数量*/
         int nfd = epoll_wait(g_efd, events, MAX_EVENTS+1, 1000);
         if (nfd < 0) {
             printf("epoll_wait error, exit\n");

@@ -1,9 +1,13 @@
-/cmake-build-debug/
+#忽略以下目录or文件
+
+cmake-build-debug
 project.properties
-/.idea/
-/test/a.out
+.idea
+a.out
 .DS_Store
-.gitignore
+.vscode
+build
+res
 
 
 

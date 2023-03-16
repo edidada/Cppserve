@@ -4,6 +4,12 @@ project(web)
 
 set(CMAKE_CXX_STANDARD 23)
 
-add_executable(web test/main.cpp http/httpheader.h http/linux_httpserve.h http/router/router.h Cmdoule.h)
+aux_source_directory(./http/ HTTP)
+
+aux_source_directory(./basedata/src SQL)
+
+add_executable(web test/main.cpp ${HTTP} ${SQL})
+
+target_link_libraries(web libmysqlclient.so)
 
 

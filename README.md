@@ -6,9 +6,19 @@
 
 目前框架准备取名为chamber，具体功能正在逐渐完善，如有改进或者提议的地方欢迎指导
 
+后续将会推出详细的使用文档，以及头文件引入教程，目前支持使用方式
+1.直接引入头文件`chamber.h`
+```sh
+clang++ main.cpp -lmysqlclient
+```
+2.使用CMakeLists.txt引入直接构建
+
 ### 文件结构
 
 ```
+----basedata
+    ---src      数据库源文件
+    ---corm.h   数据库声明头文件
 ----http        //tcp请求响应逻辑部分
 	---httpheader.h
 	---httpserve.h
@@ -28,6 +38,7 @@ Cmdouble.h
 - **http**：该目录为存放网络通行建立以及路由选择之类功能目录
 - **router**：该目录为进行路由选择等功能处理目录
 - **str**：该目录为字符串相关处理目录
+- **basedata**:该目录为数据库相关目录
 - **test**：该目录为框架测试代码
 
 **文件名：**
@@ -52,9 +63,14 @@ Cmdouble.h
 
 ### 性能测试结果
 
-![](https://raw.githubusercontent.com/charmber/images/main/img.png)
+![](https://charmber-image-bed.oss-cn-shanghai.aliyuncs.com/20230316145927.png)
 
-在并发量为800的情况下也能稳定全部请求成功
+在并发量为4570的情况下也能稳定全部请求成功,并且每分钟并发量达到54万，QBS可以达到上万次，10304/s
+(此并发量请求全部成功没有延迟，因此还没有达到最大性能，我的测试机是虚拟机，目前只能达到这个请求数)
+
+### 增加数据库curd相关功能，支持面向对象式传参使用，不在依靠SQL语句
+
+![](https://charmber-image-bed.oss-cn-shanghai.aliyuncs.com/20230316111938.png)
 
 #### 路由相关api
 实现类为router，
@@ -101,3 +117,23 @@ void test(Header hea){
     hea.SendRequestHeader(200,st);
 }
 ```
+
+使用SQL操作数据库可以
+```c++
+
+    c.InitMysql("127.0.0.1", "root", "131420", "test", 3306);
+    c.ConditionSearch("user", "age>=", "15", "name", "age");
+    c.GetResult();
+    
+    std::unordered_map<std::string,std::string> tmp={
+        {"name","测试"},
+        {"age","33"},
+        {"number","11445566"},
+        {"ID","8"}
+    };
+    c.InsertData("user",tmp);
+
+    c.CloseMysql();
+```
+最终效果：
+![](https://charmber-image-bed.oss-cn-shanghai.aliyuncs.com/20230316142102.png)
