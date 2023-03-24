@@ -3,16 +3,83 @@
 const std::string Empty = " ";
 const std::string comma = ",";
 
-const std::string INSTERT_SQL="insert into";
-const std::string VALUES_SQL="values";
+const std::string INSTERT_SQL = "insert into";
+const std::string VALUES_SQL = "values";
 
 Cmysql::Cmysql()
 {
-   
+
     DB = mysql_init(&mysql_conn);
 }
 
+Cmysql::Cmysql(int num)
+{
+    n = num;
+    for (int i = 0; i < n; i++)
+    {
+        DBList.push_back(mysql_init(&mysql_conn));
+    }
+    PooLock = true;
+}
 
+MYSQL *Cmysql::GetMysqlDB()
+{
+    // 判断队列里面是否有DB
+    std::lock_guard<std::mutex> lock(DBList_lock);
+    if (!DBList.empty())
+    {
+
+        auto tmp = DBList.front();
+        DBList.pop_front();
+        return tmp;
+    }
+
+    return nullptr;
+}
+
+SQLDATA Cmysql::GetResultPool(MYSQL* handle){
+    SQLDATA data;
+    // 获取结果集
+    MYSQL_RES *res = mysql_store_result(handle);
+
+    // 获取结果集行数
+    int num = mysql_num_rows(res);
+
+    // 获取结果集列数
+    int field = mysql_field_count(handle);
+
+    // 获取结果集列字段属性
+    MYSQL_FIELD *ValueName;
+    ValueName = mysql_fetch_fields(res);
+    for (int i = 0; i < num; ++i)
+    {
+        // 取出一行记录
+        MYSQL_ROW r = mysql_fetch_row(res);
+        for (int j = 0; j < field; ++j)
+        {
+            data[ValueName[j].name].push_back(r[j]);
+        }
+    }
+}
+
+SQLDATA Cmysql::SubmitTask(std::string sql)
+{
+    MYSQL* DBPool=nullptr;
+    do
+    {
+         DBPool= GetMysqlDB();
+        if (DBPool != nullptr)
+        {
+            int k = mysql_query(DBPool, sql.c_str());
+            if (k != 0)
+            {
+                printf("执行失败\n");
+                return;
+            }
+            return GetResultPool(DBPool);
+        }
+    } while (!DBPool);
+}
 
 /*
 初始化数据库连接
@@ -38,7 +105,6 @@ void Cmysql::InitMysql(const char *address, const char *user, const char *passwo
     }
     printf("Mysql 连接成功\n");
 }
-
 
 /*
  *根据条件搜索数据内容
@@ -76,28 +142,27 @@ void Cmysql::ConditionSearch(std::string TableName, std::string Condition, std::
     }
 }
 
-
 // 关闭数据库连接
 void Cmysql::CloseMysql()
 {
     mysql_close(DB);
 }
 
-//获取结果集数据
+// 获取结果集数据
 void Cmysql::GetResult()
 {
-    //获取结果集
+    // 获取结果集
     MYSQL_RES *res = mysql_store_result(DB);
 
-    //获取结果集行数
+    // 获取结果集行数
     int num = mysql_num_rows(res);
 
-    //获取结果集列数
+    // 获取结果集列数
     int field = mysql_field_count(DB);
 
-    //获取结果集列字段属性
-    MYSQL_FIELD * ValueName;
-    ValueName=mysql_fetch_fields(res);
+    // 获取结果集列字段属性
+    MYSQL_FIELD *ValueName;
+    ValueName = mysql_fetch_fields(res);
     for (int i = 0; i < num; ++i)
     {
         // 取出一行记录
@@ -109,34 +174,37 @@ void Cmysql::GetResult()
     }
 }
 
-
-//输出结果集数据到终端
-void Cmysql::OutResultTerminal(){
-    for(auto x:ResultData){
-        printf("%s:",x.first.c_str());
-        for(auto k:x.second){
-            printf("%s ",k.c_str());
+// 输出结果集数据到终端
+void Cmysql::OutResultTerminal()
+{
+    for (auto x : ResultData)
+    {
+        printf("%s:", x.first.c_str());
+        for (auto k : x.second)
+        {
+            printf("%s ", k.c_str());
         }
         printf("\n");
     }
 }
 
-void Cmysql::InsertData(std::string TableName,std::unordered_map<std::string,std::string> in){
-    std::string tmp1,tmp2;
-    for(auto k:in){
-        tmp1+=k.first+comma;
-        tmp2+="\""+k.second+"\""+comma;
+void Cmysql::InsertData(std::string TableName, std::unordered_map<std::string, std::string> in)
+{
+    std::string tmp1, tmp2;
+    for (auto k : in)
+    {
+        tmp1 += k.first + comma;
+        tmp2 += "\"" + k.second + "\"" + comma;
     }
-    //去除最后多余逗号
+    // 去除最后多余逗号
     tmp1.pop_back();
     tmp2.pop_back();
 
-    std::string sql=INSTERT_SQL+Empty+TableName+Empty+"("+tmp1+")"+Empty+VALUES_SQL+Empty+"("+tmp2+")";
-        int k = mysql_query(DB, sql.c_str());
+    std::string sql = INSTERT_SQL + Empty + TableName + Empty + "(" + tmp1 + ")" + Empty + VALUES_SQL + Empty + "(" + tmp2 + ")";
+    int k = mysql_query(DB, sql.c_str());
     if (k != 0)
     {
         printf("插入失败\n");
         return;
     }
-
 }

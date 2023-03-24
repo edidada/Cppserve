@@ -1,6 +1,5 @@
 #include <queue>
 #include <thread>
-#include <mutex>
 #include <unistd.h>
 
 template<typename T>
