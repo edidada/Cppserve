@@ -4,6 +4,8 @@ project(web)
 
 set(CMAKE_CXX_STANDARD 23)
 
+add_definitions("-Wall -g")
+
 aux_source_directory(./http/ HTTP)
 
 aux_source_directory(./basedata/src SQL)

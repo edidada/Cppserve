@@ -6,7 +6,18 @@ void test(Header hea){
     te["测试"]="成功";
     te["测试2"]="哈哈哈";
     std::string st= Json(te);
-
+    
+    CmyPool.InitCmysqlPool(16,"127.0.0.1", "root", "131420", "test", 3306);
+    auto tmp=CmyPool.SubmitTask("select name,age from user where age>=15");
+    for (auto x : tmp)
+    {
+        printf("%s:", x.first.c_str());
+        for (auto k : x.second)
+        {
+            printf("%s ", k.c_str());
+        }
+        printf("\n");
+    }
     hea.SendRequestHeader(200,st);
 }
 

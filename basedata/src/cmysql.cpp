@@ -6,23 +6,32 @@ const std::string comma = ",";
 const std::string INSTERT_SQL = "insert into";
 const std::string VALUES_SQL = "values";
 
-Cmysql::Cmysql()
+
+
+void CmysqlPool::InitCmysqlPool(int num, const char *address, const char *user, const char *password, const char *DbName, int port = 3306)
 {
 
-    DB = mysql_init(&mysql_conn);
-}
-
-Cmysql::Cmysql(int num)
-{
     n = num;
     for (int i = 0; i < n; i++)
     {
-        DBList.push_back(mysql_init(&mysql_conn));
+        MYSQL *con = NULL;
+        con = mysql_init(con);
+
+        if (con == NULL)
+        {
+            exit(1);
+        }
+        mysql_real_connect(con, address, user, password, DbName, port, NULL, 0);
+
+        if (con == NULL)
+        {
+            exit(1);
+        }
+        DBList.push_back(con);
     }
-    PooLock = true;
 }
 
-MYSQL *Cmysql::GetMysqlDB()
+MYSQL *CmysqlPool::GetMysqlDB()
 {
     // 判断队列里面是否有DB
     std::lock_guard<std::mutex> lock(DBList_lock);
@@ -37,7 +46,8 @@ MYSQL *Cmysql::GetMysqlDB()
     return nullptr;
 }
 
-SQLDATA Cmysql::GetResultPool(MYSQL* handle){
+SQLDATA CmysqlPool::GetResultPool(MYSQL *handle)
+{
     SQLDATA data;
     // 获取结果集
     MYSQL_RES *res = mysql_store_result(handle);
@@ -60,34 +70,53 @@ SQLDATA Cmysql::GetResultPool(MYSQL* handle){
             data[ValueName[j].name].push_back(r[j]);
         }
     }
+    std::lock_guard<std::mutex> lock(DBList_lock);
+    DBList.emplace_back(handle);
+    return data;
 }
 
-SQLDATA Cmysql::SubmitTask(std::string sql)
+
+/**
+* @brief 提交执行的sql语句任务并获取结果
+* @param sql 执行的sql语句字符串
+* @return 返回结果集
+*/
+SQLDATA CmysqlPool::SubmitTask(std::string sql)
 {
-    MYSQL* DBPool=nullptr;
+    SQLDATA data;
+    MYSQL *DBPool = nullptr;
     do
     {
-         DBPool= GetMysqlDB();
+        DBPool = GetMysqlDB();
+        printf("ptr:%p\n",DBPool);
         if (DBPool != nullptr)
         {
             int k = mysql_query(DBPool, sql.c_str());
             if (k != 0)
             {
-                printf("执行失败\n");
-                return;
+                printf("SubmitTask:%s执行失败\n", sql.c_str());
+                return data;
             }
             return GetResultPool(DBPool);
         }
     } while (!DBPool);
+    return data;
 }
 
-/*
-初始化数据库连接
-address:数据库地址
-user:用户名
-password:密码
-DbName:连接的数据库名
-port:连接数据库端口
+
+Cmysql::Cmysql()
+{
+
+    DB = mysql_init(&mysql_conn);
+}
+
+/**
+* @brief 初始化数据库连接
+* @param address 数据库连接地址
+* @param user 用户名
+* @param password 密码
+* @param DbName 连接的数据库名
+* @param port:连接数据库端口
 */
 void Cmysql::InitMysql(const char *address, const char *user, const char *password, const char *DbName, int port)
 {
@@ -106,13 +135,14 @@ void Cmysql::InitMysql(const char *address, const char *user, const char *passwo
     printf("Mysql 连接成功\n");
 }
 
-/*
- *根据条件搜索数据内容
- *Mysql 初始化数据库返回的数据库句柄
- *TableName 表名
- *Condition 条件
- *Vaule 值
- *... 需要获得的字段
+
+/**
+ * @brief 根据条件搜索数据内容
+ * @param Mysql 初始化数据库返回的数据库句柄
+ * @param TableName 表名
+ * @param Condition 条件
+ * @param Vaule 值
+ * @param ... 需要获得的字段
  *例如,ConditionSearch("user", "age>=", "15", "name", "age");对应sql语句：select name,age from user where age>=15;
  */
 void Cmysql::ConditionSearch(std::string TableName, std::string Condition, std::string Vaule, ...)
@@ -151,6 +181,7 @@ void Cmysql::CloseMysql()
 // 获取结果集数据
 void Cmysql::GetResult()
 {
+    SQLDATA ResultData;
     // 获取结果集
     MYSQL_RES *res = mysql_store_result(DB);
 
@@ -208,3 +239,5 @@ void Cmysql::InsertData(std::string TableName, std::unordered_map<std::string, s
         return;
     }
 }
+
+

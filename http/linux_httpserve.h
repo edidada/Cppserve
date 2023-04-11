@@ -72,10 +72,3 @@ int chamber::run() {
         }
     }
 }
-
-void chamber::init() {
-    t.push_back("test1");
-    t.push_back("test2");
-    t.push_back("test3");
-    t.push_back("test4");
-}
