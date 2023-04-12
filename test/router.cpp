@@ -2,8 +2,9 @@
 
 
 void RouterManage(){
-    router.Get("index",test);
-    router.Get("login",login);
-    router.Get("fin",fin);
+    Router *r=Router::AcquireRouter();
+    r->Get("index",test);
+    r->Get("login",login);
+    r->Get("fin",fin);
 }
 

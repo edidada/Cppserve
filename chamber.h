@@ -2,6 +2,3 @@
 #include "./http/httpserve.h"
 #include "./basedata/corm.h"
 
-
-
-CmysqlPool CmyPool;

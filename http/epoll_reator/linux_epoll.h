@@ -10,8 +10,6 @@
 #include <time.h>
 #include "../router/router.h"
 
-Router router; // 路由创建
-
 #define MAX_EVENTS 1024 // 监听上限数
 #define BUFLEN 4096
 
@@ -172,7 +170,8 @@ void Send_data(int fd, int events, void *arg)
 
     header.SerializationHeader(ev->buf);
     EventDel(g_efd, ev);
-    router.CallRequest(header);
+    Router *r=Router::AcquireRouter();
+    r->CallRequest(header);
 
     return;
 }

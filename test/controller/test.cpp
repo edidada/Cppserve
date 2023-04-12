@@ -6,9 +6,9 @@ void test(Header hea){
     te["测试"]="成功";
     te["测试2"]="哈哈哈";
     std::string st= Json(te);
+    CmysqlPool *sqlPool=CmysqlPool::AcquireCmysqlPool();
     
-    CmyPool.InitCmysqlPool(16,"127.0.0.1", "root", "131420", "test", 3306);
-    auto tmp=CmyPool.SubmitTask("select name,age from user where age>=15");
+    auto tmp=sqlPool->SubmitTask("select name,age from user where age>=15");
     for (auto x : tmp)
     {
         printf("%s:", x.first.c_str());

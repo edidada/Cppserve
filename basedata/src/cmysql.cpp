@@ -104,6 +104,11 @@ SQLDATA CmysqlPool::SubmitTask(std::string sql)
 }
 
 
+CmysqlPool* CmysqlPool::AcquireCmysqlPool(){
+    static CmysqlPool myPool;
+    return &myPool;
+}
+
 Cmysql::Cmysql()
 {
 

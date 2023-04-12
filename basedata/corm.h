@@ -38,9 +38,12 @@ public:
     //std::deque<std::string> TaskSql; // 数据库执行任务队列
 
     SQLDATA SubmitTask(std::string sql);
-    void InitCmysqlPool(int num, const char *address, const char *user, const char *password, const char *DbName, int port);
+    void InitCmysqlPool(int num, const char *address,       \
+     const char *user, const char *password, const char *DbName, int port);
 
+    static CmysqlPool* AcquireCmysqlPool();
 private:
+    CmysqlPool(){};
     std::deque<MYSQL *> DBList; // 存放数据库连接池数据库句柄
     std::mutex DBList_lock;
     MYSQL *GetMysqlDB();

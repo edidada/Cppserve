@@ -1,6 +1,12 @@
 #include "../httpheader.h"
 #include "../threadpool/threadpool.h"
 
+/**
+ * @brief 路由存储数据类型
+ * 1.key为路由访问路径
+ * 2.对应需要执行的函数逻辑，存储该函数的地址，传入Header对象
+*/
+typedef std::unordered_map<std::string,std::function<void(Header)>> RouterUrl;
 
 class Router{
 public:
@@ -13,15 +19,22 @@ public:
         pool=p;
         use_thread= true;
     }
+    static Router* AcquireRouter();
 
 private:
-    std::unordered_map<std::string,std::function<void(Header)>> router;
-    std::unordered_map<std::string,std::function<void(Header)>> PostRouter;
-    std::unordered_map<std::string,std::function<void(Header)>> GetRouter;
+    Router(){}
+    RouterUrl router;
+    RouterUrl PostRouter;
+    RouterUrl GetRouter;
 
     ThreadPool* pool;
     bool use_thread= false;
 };
+
+Router* Router::AcquireRouter(){
+    static Router router;
+    return &router;
+}
 
 //添加GET请求
 void Router::Get(std::string url, std::function<void(Header)> p) {

@@ -8,8 +8,15 @@ int main()
     
     ThreadPool pool(16);
     pool.init();
-    router.StartThreadPool(&pool);
+
+    CmysqlPool *sqlPool=CmysqlPool::AcquireCmysqlPool();
+    sqlPool->InitCmysqlPool(16,"127.0.0.1", "root", "131420", "test", 3306);
+
+    Router *r=Router::AcquireRouter();
+    r->StartThreadPool(&pool);
     RouterManage();
+
+
     chamber c(9999);
     c.run();
     return 0;
