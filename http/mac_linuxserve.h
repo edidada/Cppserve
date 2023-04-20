@@ -1,4 +1,4 @@
-#include "./router/router.h"
+#include "router/router.h"
 #include <fcntl.h>
 #include<arpa/inet.h>
 #include<sys/event.h>

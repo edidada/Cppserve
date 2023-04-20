@@ -4,7 +4,7 @@
 #define BUFLEN 4096                 //缓冲区大小
 
 //查找键值对
-void FindKeyValue(std::unordered_map<std::string,std::string>&Te,std::string s,int start,std::string Key);
+void FindKeyValue(HTTP_HEADER&Te,std::string s,int start,std::string Key);
 
 //查找Json
 void FindJson(std::string &json,std::string s,int start);
@@ -27,12 +27,12 @@ public:
     std::string Http;
     std::string HttpRequestWay;
     std::string HttpRequestUrl;
-    std::unordered_map<std::string,std::string> HttpUserAgent;
-    std::unordered_map<std::string,std::string> HttpAccept;
-    std::unordered_map<std::string,std::string> HttpConnection;
-    std::unordered_map<std::string,std::string> HttpAcceptEncoding;
-    std::unordered_map<std::string,std::string> HttpAcceptLanguage;
-    std::unordered_map<std::string,std::string> HttpCookie;
+    HTTP_HEADER HttpUserAgent;
+    HTTP_HEADER HttpAccept;
+    HTTP_HEADER HttpConnection;
+    HTTP_HEADER HttpAcceptEncoding;
+    HTTP_HEADER HttpAcceptLanguage;
+    HTTP_HEADER HttpCookie;
     std::string HttpBody;
     std::string initHeader();
     void StrChangeChar(std::string,char []);//字符串转char类型
@@ -60,10 +60,10 @@ std::string Header::initHeader() {
     return Header+ContentTypeJson+connection;
 }
 
-/*
-*reques请求信息
-*code:请求状态码
-*msg：携带的信息
+/**
+ * @brief 发送http响应结果
+ * @param code 发送的http请求状态码
+ * @param msg 发送的http请求json字符串
 */
 
 int Header::SendRequestHeader(int code,std::string msg){
@@ -71,7 +71,15 @@ int Header::SendRequestHeader(int code,std::string msg){
     char res[1024];
     StrChangeChar(head+msg,res);
     int n=send(serverID,res, strlen(res),0);
-    printf("%s %s %d success!\n",HttpRequestWay.c_str(),HttpRequestUrl.c_str(),code);
+    //printf("%s %s %d success!\n",HttpRequestWay.c_str(),HttpRequestUrl.c_str(),code);
+    ColorCout_256<std::string>(HttpRequestWay,231,32);
+    ColorCout_256<std::string>(HttpRequestUrl,231,170);
+    if(code==200){
+        ColorCout_256<int>(code,231,2);
+    }else{
+        ColorCout_256<int>(code,231,1);
+    }
+    printf("\n");
     close(serverID);
     return n;
 }
@@ -106,7 +114,6 @@ void Header::SerializationHeader(char res[]) {
             }
         }
     }
-    //std::cout<<"url:"<<HttpRequestUrl<<std::endl;
     int l=HttpRequestWay.size()+HttpRequestUrl.size()+Http.size();
     //序列化头部键值对
     int conn=str.find("Connection",l);
@@ -127,7 +134,7 @@ void Header::SerializationHeader(char res[]) {
 
 
 //查找键值对
-void FindKeyValue(std::unordered_map<std::string,std::string>&Te,std::string s,int start,std::string Key){
+void FindKeyValue(HTTP_HEADER&Te,std::string s,int start,std::string Key){
     int lock=0,begin=0;
     for(int i=start+Key.size();i<s.size();i++){
         if(s[i]==' '&&!lock){
@@ -141,7 +148,6 @@ void FindKeyValue(std::unordered_map<std::string,std::string>&Te,std::string s,i
             }
         }
     }
-    //std::cout<<Key<<":"<<Te[Key]<<std::endl;
 }
 
 void FindJson(std::string &json,std::string s,int start){

@@ -8,7 +8,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
-#include "../router/router.h"
+#include "router/router.h"
 
 #define MAX_EVENTS 1024 // 监听上限数
 #define BUFLEN 4096
@@ -57,10 +57,6 @@ void EventAdd(int efd, int events, struct myevent_s *ev)
     }
 
     epoll_ctl(efd, op, ev->fd, &epv);
-        // if (epoll_ctl(efd, op, ev->fd, &epv) < 0)                       //实际添加/修改
-        //     printf("event add failed [fd=%d], events[%d]\n", ev->fd, events);
-        // else
-        //     printf("event add OK [fd=%d], op=%d, events[%0X]\n", ev->fd, op, events);
 
         return;
 }

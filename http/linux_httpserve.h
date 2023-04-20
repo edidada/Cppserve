@@ -18,6 +18,7 @@ private:
 };
 
 chamber::chamber(int p) {
+    InitPrint();
     Port=p;
 }
 

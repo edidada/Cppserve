@@ -1,4 +1,4 @@
-#include "../corm.h"
+#include "corm.h"
 
 const std::string Empty = " ";
 const std::string comma = ",";
@@ -88,7 +88,6 @@ SQLDATA CmysqlPool::SubmitTask(std::string sql)
     do
     {
         DBPool = GetMysqlDB();
-        printf("ptr:%p\n",DBPool);
         if (DBPool != nullptr)
         {
             int k = mysql_query(DBPool, sql.c_str());

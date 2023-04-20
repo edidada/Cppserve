@@ -4,6 +4,11 @@ project(web)
 
 set(CMAKE_CXX_STANDARD 23)
 
+#设置头文件的搜索路径
+include_directories(./basedata)
+
+include_directories(./http ./str)
+
 add_definitions("-Wall -g")
 
 aux_source_directory(./http/ HTTP)

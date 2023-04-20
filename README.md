@@ -137,3 +137,7 @@ void test(Header hea){
 ```
 最终效果：
 ![](https://charmber-image-bed.oss-cn-shanghai.aliyuncs.com/20230316142102.png)
+
+增加了炫酷的启动特效字体以及请求响应提示颜色背景
+效果如下：
+![](https://charmber-image-bed.oss-cn-shanghai.aliyuncs.com/20230420104333.png)
