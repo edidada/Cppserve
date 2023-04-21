@@ -1,6 +1,5 @@
 #include "corm.h"
 
-const std::string Empty = " ";
 const std::string comma = ",";
 
 const std::string INSTERT_SQL = "insert into";
@@ -151,7 +150,7 @@ void Cmysql::InitMysql(const char *address, const char *user, const char *passwo
  */
 void Cmysql::ConditionSearch(std::string TableName, std::string Condition, std::string Vaule, ...)
 {
-    std::string sql = "select" + Empty;
+    std::string sql = "select" + EMPTY;
     va_list v;   // 定义va_list
     char *value; // 用于获取值
 
@@ -164,7 +163,7 @@ void Cmysql::ConditionSearch(std::string TableName, std::string Condition, std::
         sql += value + comma;
     }
     sql.pop_back();
-    sql += Empty + "from" + Empty + TableName + Empty + "where" + Empty + Condition + Vaule;
+    sql += EMPTY + "from" + EMPTY + TableName + EMPTY + "where" + EMPTY + Condition + Vaule;
     va_end(v); // 结束参数的获取
     const char *q = sql.c_str();
     // const char* q="select name,age from user where age>=15;";
@@ -235,7 +234,7 @@ void Cmysql::InsertData(std::string TableName, std::unordered_map<std::string, s
     tmp1.pop_back();
     tmp2.pop_back();
 
-    std::string sql = INSTERT_SQL + Empty + TableName + Empty + "(" + tmp1 + ")" + Empty + VALUES_SQL + Empty + "(" + tmp2 + ")";
+    std::string sql = INSTERT_SQL + EMPTY + TableName + EMPTY + "(" + tmp1 + ")" + EMPTY + VALUES_SQL + EMPTY + "(" + tmp2 + ")";
     int k = mysql_query(DB, sql.c_str());
     if (k != 0)
     {
