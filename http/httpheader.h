@@ -40,13 +40,44 @@ public:
     int serverID;
     myevent_s *ev;
     int g_efd;
+    Header();
+    void SetContentType(std::string Key, std::string value);
+    void DeleContentType(std::string Key);
 
 private:
+    HTTP_HEADER ContentType;
     std::string HTTP_VERSION = HTTP_1_1;
-    const std::string Header = "HTTP/1.1 200 ok\r\n";
-    const std::string ContentTypeJson = "content-type: application/json;charset=utf-8\r\n";
+    std::string ContentTypeJson = "content-type: application/json;charset=utf-8\r\n";
     const std::string connection = "connection: close\r\n\r\n";
 };
+
+/**
+ * @brief 构造函数，创建对象，默认初始化三个键值对
+*/
+Header::Header()
+{
+    ContentType = {
+        {"Content-Type", "Content-Type:application/json;charset=utf-8\r\n"},
+        {"Connection", "Connection:close\r\n\r\n"},
+        {"HTTP_VERSION", HTTP_1_1}};
+}
+
+
+/**
+ * @brief 增加or修改HTTP响应头部键值对
+ * @param Key HTTP响应头键名
+ * @param value HTTP响应头键值
+*/
+void Header::SetContentType(std::string Key, std::string value){
+    ContentType[Key]=Key+":"+value+ENTER_WRAP;
+}
+
+/**
+ * @brief 删除响应头键
+*/
+void Header::DeleContentType(std::string Key){
+    ContentType.erase(Key);
+}
 
 // string类型转char类型
 void Header::StrChangeChar(std::string str, char msg[])
@@ -63,18 +94,31 @@ void Header::StrChangeChar(std::string str, char msg[])
 int Header::SendRequestHeader(int code, std::string msg)
 {
     std::string head;
-    int i=code%100;
+    int i = code % 100;
 
-    //判断状态码
-    if (code/100 == 2)
+    // 判断状态码
+    if (code / 100 == 2)
     {
-        head = HTTP_VERSION + EMPTY + HTTP_STATUS[i]+ ENTER_WRAP + ContentTypeJson + connection;
-    }else if(code/100==3){
-        head = HTTP_VERSION + EMPTY + HTTP_STATUS[HTTP_CODE_3XX+i]+ ENTER_WRAP + ContentTypeJson + connection;
-    }else if(code/100==4){
-        head = HTTP_VERSION + EMPTY + HTTP_STATUS[HTTP_CODE_4XX+i]+ ENTER_WRAP + ContentTypeJson + connection;
+        head = ContentType["HTTP_VERSION"] + EMPTY + HTTP_STATUS[i] + ENTER_WRAP + ContentType["Content-Type"];
+    }
+    else if (code / 100 == 3)
+    {
+        head = ContentType["HTTP_VERSION"] + EMPTY + HTTP_STATUS[HTTP_CODE_3XX + i] + ENTER_WRAP + ContentType["Content-Type"];
+    }
+    else if (code / 100 == 4)
+    {
+        head = ContentType["HTTP_VERSION"] + EMPTY + HTTP_STATUS[HTTP_CODE_4XX + i] + ENTER_WRAP + ContentType["Content-Type"];
     }
 
+    //循环添加键值对到http响应头部
+    for(auto key:ContentType){
+        if(key.first=="HTTP_VERSION"||key.first=="Content-Type"||key.first=="Connection"){
+            continue;
+        }else{
+            head+=key.second;
+        }
+    }
+    head+=ContentType["Connection"];
     char res[1024];
     StrChangeChar(head + msg, res);
     int n = send(serverID, res, strlen(res), 0);

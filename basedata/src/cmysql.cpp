@@ -82,7 +82,6 @@ SQLDATA CmysqlPool::GetResultPool(MYSQL *handle)
 */
 SQLDATA CmysqlPool::SubmitTask(std::string sql)
 {
-    SQLDATA data;
     MYSQL *DBPool = nullptr;
     do
     {
@@ -93,12 +92,12 @@ SQLDATA CmysqlPool::SubmitTask(std::string sql)
             if (k != 0)
             {
                 printf("SubmitTask:%s执行失败\n", sql.c_str());
-                return data;
+                return {};
             }
             return GetResultPool(DBPool);
         }
     } while (!DBPool);
-    return data;
+    return {};
 }
 
 
@@ -222,6 +221,11 @@ void Cmysql::OutResultTerminal()
     }
 }
 
+/**
+ * @brief 插入数据到相关的表名
+ * @param TableName 需要插入数据的表名
+ * @param in 需要插入的数据，key为字段名，value为值
+*/
 void Cmysql::InsertData(std::string TableName, std::unordered_map<std::string, std::string> in)
 {
     std::string tmp1, tmp2;

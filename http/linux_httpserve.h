@@ -25,9 +25,10 @@ chamber::chamber(int p) {
 //socket运行
 int chamber::run() {
     g_efd = epoll_create(MAX_EVENTS+1);                 //创建红黑树,返回给全局 g_efd
-    if (g_efd <= 0)
+    if (g_efd <= 0){
         printf("create efd in %s err %s\n", __func__, strerror(errno));
-
+        return -1;
+    }
     Init_listen_socket(g_efd, Port);                      //初始化监听socket
 
     struct epoll_event events[MAX_EVENTS+1];            //保存已经满足就绪事件的文件描述符数组
@@ -72,4 +73,5 @@ int chamber::run() {
             }
         }
     }
+    return 0;
 }
