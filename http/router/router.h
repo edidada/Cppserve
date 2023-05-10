@@ -65,6 +65,7 @@ void Router::CallRequest(Header& header) {
         }else if(header.HttpRequestWay=="POST"||header.HttpRequestWay=="post"){
             if(PostRouter.count(header.HttpRequestUrl) == 1){
                 pool->submit(PostRouter[header.HttpRequestUrl],header);
+                
             }else{
                 std::cout<<"router error"<<std::endl;
                 close(header.serverID);
@@ -73,14 +74,16 @@ void Router::CallRequest(Header& header) {
     } else{
         if (header.HttpRequestWay=="GET"||header.HttpRequestWay=="get") {
             if(GetRouter.count(header.HttpRequestUrl) == 1){
-                pool->submit(GetRouter[header.HttpRequestUrl],header);
+                //pool->submit(GetRouter[header.HttpRequestUrl],header);
+                GetRouter[header.HttpRequestUrl](header);
             }else{
                 std::cout<<"router error"<<std::endl;
                 close(header.serverID);
             }
         }else if(header.HttpRequestWay=="POST"||header.HttpRequestWay=="post"){
             if(PostRouter.count(header.HttpRequestUrl) == 1){
-                pool->submit(PostRouter[header.HttpRequestUrl],header);
+                //pool->submit(PostRouter[header.HttpRequestUrl],header);
+                PostRouter[header.HttpRequestUrl](header);
             }else{
                 std::cout<<"router error"<<std::endl;
                 close(header.serverID);
