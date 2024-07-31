@@ -19,5 +19,5 @@ aux_source_directory(./rpc/src RPC)
 
 add_executable(web test/main.cpp ${HTTP} ${SQL} ${RPC})
 
-target_link_libraries(web libmysqlclient.so)
+target_link_libraries(web libmysqlclient.so pthread)
 
